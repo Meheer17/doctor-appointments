@@ -94,7 +94,7 @@ export async function POST(
                         slotdetail.start_time,
                         slotdetail.end_time,
                         slotdetail.slot_duration,
-                        i.toISOString(),
+                        i.toLocaleDateString(),
                         id,
                     ).forEach((i) => {
                         result.push(i);
@@ -162,7 +162,7 @@ function CreateSlots(
             patient_email: "",
             patient_visit_reason: "",
             doctor_id: doctor_id,
-            appoitment_date: new Date(date),
+            appoitment_date: date,
             booked: false,
         });
     }

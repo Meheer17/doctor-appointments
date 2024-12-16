@@ -28,7 +28,7 @@ export type SlotsData = {
     patient_phone: string;
     patient_visit_reason: string;
     doctor_id: string;
-    appoitment_date: Date;
+    appoitment_date: string;
     booked: boolean;
 };
 
