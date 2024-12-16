@@ -52,14 +52,14 @@ export async function POST(
         for (
             let i = new Date(slotdetail.slot_start_date);
             i <= new Date(slotdetail.slot_end_date);
-            i.setUTCDate(i.getUTCDate() + 1) // Use UTC for consistency
+            i.setUTCDate(i.getUTCDate() + 1)
         ) {
             if (slotdetail.slot_type === "daily") {
                 CreateSlots(
                     slotdetail.start_time,
                     slotdetail.end_time,
                     slotdetail.slot_duration,
-                    new Date(i), // Pass a copy of `i` to avoid mutation
+                    new Date(i),
                     id,
                 ).forEach((slot) => {
                     result.push(slot);
@@ -71,7 +71,7 @@ export async function POST(
                         slotdetail.start_time,
                         slotdetail.end_time,
                         slotdetail.slot_duration,
-                        new Date(i), // Pass a copy of `i` to avoid mutation
+                        new Date(i),
                         id,
                     ).forEach((slot) => {
                         result.push(slot);
@@ -82,7 +82,7 @@ export async function POST(
                     slotdetail.start_time,
                     slotdetail.end_time,
                     slotdetail.slot_duration,
-                    new Date(i), // Pass a copy of `i` to avoid mutation
+                    new Date(i),
                     id,
                 ).forEach((slot) => {
                     result.push(slot);
