@@ -1,4 +1,4 @@
-import { session, slotDb } from "@/lib/db";
+import clientPromise, { slotDb } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
@@ -7,6 +7,7 @@ export async function POST(
 ) {
     const slot = (await params).slot;
     const book = await req.json();
+    const session = (await clientPromise).startSession();
     let data;
     try {
         session.startTransaction();

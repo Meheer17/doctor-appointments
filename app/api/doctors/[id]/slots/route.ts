@@ -12,7 +12,6 @@ export async function GET(
 
     return NextResponse.json({ message: data });
 }
-
 export async function POST(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> },
@@ -30,7 +29,7 @@ export async function POST(
     ) {
         return NextResponse.json({
             success: false,
-            error: "U must fill all the details!",
+            error: "You must fill all the details!",
         });
     } else if (slotdetail.slot_type != "weekly" && !slotdetail.days) {
         return NextResponse.json({ success: false, error: "Select the days!" });
@@ -45,59 +44,37 @@ export async function POST(
             error: "Invalid time interval!",
         });
     }
-    const result: SlotsData[] = [];
 
+    const result: SlotsData[] = [];
     try {
         session.startTransaction();
-
-        const existingSlots = await doctorsDb
-            .find({
-                // _id: new ObjectId(id),
-                $or: [
-                    {
-                        "slot_details.start_time": {
-                            $gte: slotdetail.start_time,
-                        },
-                    },
-                    {
-                        "slot_details.end_time": {
-                            $lte: slotdetail.end_time,
-                        },
-                    },
-                ],
-            })
-            .toArray();
-
-        if (existingSlots.length > 0) {
-            throw Error("Slots already available.");
-        }
 
         for (
             let i = new Date(slotdetail.slot_start_date);
             i <= new Date(slotdetail.slot_end_date);
-            i.setDate(i.getDate() + 1)
+            i.setUTCDate(i.getUTCDate() + 1) // Use UTC for consistency
         ) {
             if (slotdetail.slot_type === "daily") {
                 CreateSlots(
                     slotdetail.start_time,
                     slotdetail.end_time,
                     slotdetail.slot_duration,
-                    i.toISOString(),
+                    new Date(i), // Pass a copy of `i` to avoid mutation
                     id,
-                ).forEach((i) => {
-                    result.push(i);
+                ).forEach((slot) => {
+                    result.push(slot);
                 });
             } else if (slotdetail.slot_type === "weekly") {
                 const weekday = ["su", "m", "tu", "w", "th", "f", "sa"];
-                if (slotdetail.days.includes(weekday[i.getDay()])) {
+                if (slotdetail.days.includes(weekday[i.getUTCDay()])) {
                     CreateSlots(
                         slotdetail.start_time,
                         slotdetail.end_time,
                         slotdetail.slot_duration,
-                        i.toLocaleDateString(),
+                        new Date(i), // Pass a copy of `i` to avoid mutation
                         id,
-                    ).forEach((i) => {
-                        result.push(i);
+                    ).forEach((slot) => {
+                        result.push(slot);
                     });
                 }
             } else if (slotdetail.slot_type === "specific") {
@@ -105,15 +82,15 @@ export async function POST(
                     slotdetail.start_time,
                     slotdetail.end_time,
                     slotdetail.slot_duration,
-                    i.toISOString(),
+                    new Date(i), // Pass a copy of `i` to avoid mutation
                     id,
-                ).forEach((i) => {
-                    result.push(i);
+                ).forEach((slot) => {
+                    result.push(slot);
                 });
             }
         }
 
-        if (result.length != 0) {
+        if (result.length !== 0) {
             await doctorsDb.updateOne(
                 { _id: new ObjectId(id) },
                 { $push: { slot_details: slotdetail } },
@@ -124,7 +101,7 @@ export async function POST(
 
         await session.commitTransaction();
     } catch (error) {
-        console.log("An error occurred during the transaction:" + error);
+        console.log("An error occurred during the transaction: " + error);
         await session.abortTransaction();
         return NextResponse.json({
             success: false,
@@ -135,7 +112,7 @@ export async function POST(
     return NextResponse.json({
         success: true,
         message: "Slots created successfully!",
-        id: result.map((i) => i.slot_id),
+        id: result.map((slot) => slot.slot_id),
     });
 }
 
@@ -143,26 +120,31 @@ function CreateSlots(
     start_time: string,
     end_time: string,
     slot_duration: number,
-    date: string,
+    date: Date,
     doctor_id: string,
 ) {
     const start = new Date(start_time);
     const end = new Date(end_time);
+
+    const adjustedDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+
     const result: SlotsData[] = [];
-    for (let i = start; i < end; i.setMinutes(i.getMinutes() + slot_duration)) {
+    for (
+        let i = new Date(start);
+        i < end;
+        i.setMinutes(i.getMinutes() + slot_duration)
+    ) {
         const t = new Date(i);
         result.push({
             slot_id: new ObjectId().toString(),
-            start_time: t.toLocaleTimeString(),
-            end_time: new Date(
-                t.setMinutes(t.getMinutes() + slot_duration),
-            ).toLocaleTimeString(),
+            start_time: t.toISOString(),
+            end_time: new Date(t.getTime() + slot_duration * 60000).toISOString(),
             patient_name: "",
             patient_phone: "",
             patient_email: "",
             patient_visit_reason: "",
             doctor_id: doctor_id,
-            appoitment_date: date,
+            appoitment_date: adjustedDate,
             booked: false,
         });
     }

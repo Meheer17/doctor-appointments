@@ -11,8 +11,8 @@ export type Doctor = {
 
 export type SlotDetails = {
     slot_duration: 0;
-    slot_start_date: string;
-    slot_end_date: string;
+    slot_start_date: Date;
+    slot_end_date: Date;
     slot_type: "daily" | "weekly" | "specific";
     days: string[];
     start_time: "";
@@ -28,7 +28,7 @@ export type SlotsData = {
     patient_phone: string;
     patient_visit_reason: string;
     doctor_id: string;
-    appoitment_date: string;
+    appoitment_date: Date;
     booked: boolean;
 };
 
