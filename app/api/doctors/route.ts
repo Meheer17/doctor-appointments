@@ -15,18 +15,22 @@ export type SlotDetails = {
     slot_start_date: string;
     slot_end_date: string;
     slot_type: "daily" | "weekly" | "specific";
-    days: [];
+    days: string[];
     start_time: "";
     end_time: "";
 };
 
 export type SlotsData = {
+    slot_id: string;
+    start_time: string;
+    end_time: string;
     patient_name: string;
     patient_email: string;
     patient_phone: string;
     patient_visit_reason: string;
+    doctor_id: string;
     appoitment_date: Date;
-    slot: number;
+    booked: boolean;
 };
 
 export async function GET() {
