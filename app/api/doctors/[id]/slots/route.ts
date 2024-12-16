@@ -1,7 +1,7 @@
 import { doctorsDb, session, slotDb } from "@/lib/db";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
-import { SlotDetails, SlotsData } from "../../route";
+import { SlotsData } from "../../route";
 
 export async function GET(
     request: NextRequest,

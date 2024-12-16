@@ -7,7 +7,6 @@ export type Doctor = {
     last_name: string;
     email: string;
     slot_details: SlotDetails[];
-    booked_slots: SlotsData[];
 };
 
 export type SlotDetails = {
@@ -46,7 +45,6 @@ export async function POST(req: NextRequest) {
         last_name: doctorData.last_name,
         email: doctorData.email,
         slot_details: [],
-        booked_slots: [],
     };
 
     const existingDoctor = await doctorsDb.findOne({ email: doctor.email });
