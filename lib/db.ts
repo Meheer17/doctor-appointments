@@ -32,4 +32,6 @@ if (process.env.NODE_ENV === "development") {
 // separate module, the client can be shared across functions.
 export default clientPromise;
 const cli = await clientPromise;
-export const doctors = cli.db().collection("doctors");
+export const doctorsDb = cli.db().collection("doctors");
+export const slotDb = cli.db().collection("slots");
+export const session = cli.startSession()

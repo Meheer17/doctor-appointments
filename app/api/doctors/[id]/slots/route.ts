@@ -1,32 +1,46 @@
-import { doctors } from "@/lib/db";
+import { doctorsDb, session } from "@/lib/db";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
+import { SlotDetails, SlotsData } from "../../route";
 
 export async function GET(
-    request: Request,
+    request: NextRequest,
     { params }: { params: Promise<{ id: string }> },
 ) {
-    const id = (await params).id
-    const data = await doctors.find({_id: new ObjectId(id)}).toArray();
+    const id = (await params).id;
+    const data = await doctorsDb.find({ _id: new ObjectId(id) }).toArray();
     return NextResponse.json({ message: data });
 }
 
-export async function POST(req: NextRequest) {
-    const { username, first_name, last_name, email } = await req.json();
-    const existingDoctor = await doctors.findOne({ email });
+export async function POST(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> },
+) {
+    const id = (await params).id;
+    const slotdata: SlotDetails = await request.json();
 
-    if (existingDoctor) {
+    if (
+        !slotdata.slot_duration ||
+        !slotdata.slot_start_date ||
+        !slotdata.slot_end_date ||
+        !slotdata.slot_type ||
+        !slotdata.start_time ||
+        !slotdata.end_time
+    ) {
         return NextResponse.json({
             success: false,
-            message: "Email already exists",
+            error: "U must fill all the details!",
         });
+    } else if (slotdata.slot_type != "weekly" && !slotdata.days) {
+        return NextResponse.json({ success: false, error: "Select the days!" });
     }
-
-    const data = await doctors.insertOne({
-        username,
-        first_name,
-        last_name,
-        email,
-    });
-    return NextResponse.json({ success: true, data });
+    
+    try {
+        session.startTransaction();
+    } catch (error) {
+        console.log("An error occurred during the transaction:" + error);
+        await session.abortTransaction();
+    } finally {
+        await session.endSession();
+    }
 }

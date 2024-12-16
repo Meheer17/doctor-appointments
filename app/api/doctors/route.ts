@@ -1,14 +1,51 @@
-import { doctors } from "@/lib/db";
+import { doctorsDb } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 
+export type Doctor = {
+    username: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    slot_details: SlotDetails[];
+    booked_slots: SlotsData[];
+};
+
+export type SlotDetails = {
+    slot_duration: 0;
+    slot_start_date: string;
+    slot_end_date: string;
+    slot_type: "daily" | "weekly" | "specific";
+    days: [];
+    start_time: "";
+    end_time: "";
+};
+
+export type SlotsData = {
+    patient_name: string;
+    patient_email: string;
+    patient_phone: string;
+    patient_visit_reason: string;
+    appoitment_date: Date;
+    slot: number;
+};
+
 export async function GET() {
-    const data = await doctors.find().toArray();
+    const data = await doctorsDb.find().toArray();
     return NextResponse.json({ data: data });
 }
 
 export async function POST(req: NextRequest) {
-    const { username, first_name, last_name, email } = await req.json();
-    const existingDoctor = await doctors.findOne({ email });
+    const doctorData = await req.json();
+    const doctor: Doctor = {
+        username: doctorData.username,
+        first_name: doctorData.first_name,
+        last_name: doctorData.last_name,
+        email: doctorData.email,
+        slot_details: [],
+        booked_slots: [],
+    };
+
+    const existingDoctor = await doctorsDb.findOne({ email: doctor.email });
 
     if (existingDoctor) {
         return NextResponse.json({
@@ -17,11 +54,12 @@ export async function POST(req: NextRequest) {
         });
     }
 
-    const data = await doctors.insertOne({
-        username,
-        first_name,
-        last_name,
-        email,
-    });
+    const data = await doctorsDb.insertOne(doctor);
+    return NextResponse.json({ success: true, data });
+}
+
+export async function DELETE(req: NextRequest) {
+    const doctor: Doctor = await req.json();
+    const data = await doctorsDb.findOneAndDelete({ email: doctor.email });
     return NextResponse.json({ success: true, data });
 }
