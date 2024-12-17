@@ -8,6 +8,12 @@ Before you begin, ensure you have the following installed:
 - [Node.js](https://nodejs.org/en/download/) (version 14 or higher)
 - [Docker](https://www.docker.com/get-started) (for running with Docker)
 
+## Technology Stack
+Framework: Next.js
+Languages: TypeScript
+DB: MongoDB
+Container: Docker
+
 ## Setup Instructions
 
 ### 1. Clone the repository
