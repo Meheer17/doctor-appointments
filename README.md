@@ -59,7 +59,7 @@ First, build the Docker image using the following command:
 
 ```bash
 cd docker/
-docker build -t doctor-appointment-api .
+docker compose up --build -d server-prd
 ```
 
 #### Step 2: Run the Docker container
